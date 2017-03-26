@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <malloc.h>
+#include <sys/socket.h>
 #include "client.h"
 #include "socket.h"
 
@@ -49,7 +50,12 @@ char codify_codon(char *codon) {
     return byte;
 }
 
-char send_input(FILE *f) {
+int send_input(FILE *f, socket_t* client) {
+    /* Read in chunks of 3 characters, codifying them into a single byte as per
+     * the codify_codon function, and pass it on to the server. Returns -1 in
+     * case of failure.
+     *
+    */
     fseek(f, 0L, SEEK_END);
     size_t len = (size_t) ftell(f);
 
@@ -61,20 +67,21 @@ char send_input(FILE *f) {
 
 
     char codon_buffer[CODON_LENGTH] = "";
-    size_t read = fread(codon_buffer, sizeof(char), CODON_LENGTH, f);
-    if (!read) {
-        fprintf(stderr, "ERROR: Failed to read the file properly\n");
-        return -1;
-    }
-    char code = codify_codon(codon_buffer);
-    if (code < 0) {
-        fprintf(stderr, "ERROR: Wrong file format, "
-                "only include characters A, U, G or C\n");
-        return -1;
-    }
+    while (1) {
+        size_t read = fread(codon_buffer, sizeof(char), CODON_LENGTH, f);
+        if (!read) { // File completely read
+            break;
+        }
+        char code = codify_codon(codon_buffer);
+        if (code < 0) {
+            fprintf(stderr, "ERROR: Wrong file format, "
+                    "only include characters A, U, G or C\n");
+            return -1;
+        }
 
-
-    return code;
+        socket_send(client, &code, sizeof(char));
+    }
+    return 0;
 }
 
 int connect_to_server(socket_t* client,
@@ -99,14 +106,11 @@ int init_client(const char *address, unsigned int port, FILE *input_file) {
         return 1;
     }
 
-    char input = send_input(input_file);
+    int input = send_input(input_file, &client);
     if (input < 0) {
         return 1;
     }
-
-
-    socket_send(&client, &input, sizeof(char));
-
+    socket_shutdown(&client, SHUT_WR);
     socket_destroy(&client);
     return 0;
 }

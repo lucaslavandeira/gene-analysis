@@ -25,9 +25,12 @@ int init_server(unsigned int port) {
     }
 
     char buf = 0;
-    socket_receive(&client, &buf, 1);
+    ssize_t bytes = 1;
+    while (bytes > 0) {
+        bytes = socket_receive(&client, &buf, 1);
+        printf("MESSAGE RECEIVED: %d\n", buf);
+    }
 
-    printf("MESSAGE RECEIVED: %d\n", buf);
     socket_send(&client, "Hi man!", 7);
     socket_destroy(&server);
     socket_destroy(&client);
