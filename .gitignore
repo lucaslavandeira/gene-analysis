@@ -7,6 +7,7 @@ cmake-build-debug
 CMakeLists.txt
 .idea
 valgrind_*
-test/tp
+tp
+input.txt
 test/*.txt
 *.args
