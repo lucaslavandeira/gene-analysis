@@ -12,7 +12,7 @@ char* read_input(FILE* f) {
     fseek(f, 0L, SEEK_END);
     size_t len = (size_t) ftell(f);
 
-    if(!len%3) {
+    if (!len%3) {
         fprintf(stderr, "Invalid amount of codons, must be a multiple of 3\n");
     }
     fseek(f, 0L, SEEK_SET);
@@ -20,7 +20,7 @@ char* read_input(FILE* f) {
     char* buf = malloc(len);
 
     size_t read = fread(buf, 1, len, f);
-    if(!read) {
+    if (!read) {
         fprintf(stderr, "ERROR: Failed to read the file properly\n");
         return NULL;
     }
@@ -52,7 +52,7 @@ void init_client(const char* address, unsigned int port, FILE* input_file) {
     }
 
     char* input = read_input(input_file);
-    if(!input) {
+    if (!input) {
         return;
     }
 

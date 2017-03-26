@@ -8,22 +8,22 @@
 
 void init_server(unsigned int port) {
     socket_t server, client;
-    if(socket_create(&server)) {
+    if (socket_create(&server)) {
         perror("Error creating the socket");
         return;
     }
 
-    if(socket_bind_and_listen(&server, port)) {
+    if (socket_bind_and_listen(&server, port)) {
         perror("Error binding the socket");
         return;
     }
 
 
-    if(socket_accept(&server, &client)) {
+    if (socket_accept(&server, &client)) {
         perror("Error accepting a connection");
         return;
     }
-    
+
     char buf[10];
     socket_receive(&client, buf, 10);
 

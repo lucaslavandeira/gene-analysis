@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
     /* arguments in order:  client <server> <port> <input-file>
      *                 OR   server <port>
      */
-    if(argc == 1) {
+    if (argc == 1) {
         print_error_string();
         return 1;
     }
@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
         fclose(f);
 
     } else if (!strcmp(argv[1], "server")) {
-        if(argc < 3) {
+        if (argc < 3) {
             print_error_string();
             return 1;
         }

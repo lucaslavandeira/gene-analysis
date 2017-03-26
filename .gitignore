@@ -1,12 +1,12 @@
 *.o
-*.sh
+free_port.sh
+run.sh
 *_std*
 *.py
 cmake-build-debug
 CMakeLists.txt
 .idea
 valgrind_*
-filter_options
-tp
+test/tp
 input.txt
 *.args
