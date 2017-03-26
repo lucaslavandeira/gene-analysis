@@ -35,51 +35,46 @@ char codify_codon(char *codon) {
      * with CODON_LENGTH = 3, and BASES = AUGC,
      * you end up with a number between 0 - 63 (4^3 choices)
     */
-    size_t len = strlen(codon);
+
     unsigned char byte = 0;
-    printf("BYTE: 0 %c %d\n", byte, byte);
-    for (int i = 0; i < len; i++) {
+    for (int i = 0; i < CODON_LENGTH; i++) {
         int result = validate_base(codon[i]);
         if (result < 0) {
             return -1;
         }
-        result = result << (2 * (len - 1 - i));
+        result = result << (2 * (CODON_LENGTH - i - 1));
         byte += result;
-        printf("BYTE: %d: %c %d\n", i, byte, byte);
     }
 
     return byte;
 }
 
-char* read_input(FILE* f) {
+char send_input(FILE *f) {
     fseek(f, 0L, SEEK_END);
     size_t len = (size_t) ftell(f);
 
     if (len%3) {
         fprintf(stderr, "Invalid amount of codons, must be a multiple of 3\n");
-        return NULL;
+        return -1;
     }
     fseek(f, 0L, SEEK_SET);
 
 
-    char codon_buffer[CODON_LENGTH];
-    for (int i = 0; i < len; i += strlen(codon_buffer)) {
-        size_t read = fread(codon_buffer, sizeof(char), CODON_LENGTH, f);
-        if (!read) {
-            fprintf(stderr, "ERROR: Failed to read the file properly\n");
-            return NULL;
-        }
-        char code = codify_codon(codon_buffer);
-        if (code < 0) {
-            fprintf(stderr, "ERROR: Wrong file format,"
-                    " only include characters A, U, G or C\n");
-            return NULL;
-        }
-        printf("The code: %d", code);
+    char codon_buffer[CODON_LENGTH] = "";
+    size_t read = fread(codon_buffer, sizeof(char), CODON_LENGTH, f);
+    if (!read) {
+        fprintf(stderr, "ERROR: Failed to read the file properly\n");
+        return -1;
+    }
+    char code = codify_codon(codon_buffer);
+    if (code < 0) {
+        fprintf(stderr, "ERROR: Wrong file format, "
+                "only include characters A, U, G or C\n");
+        return -1;
     }
 
-    printf("read input: %s", codon_buffer);
-    return NULL;
+
+    return code;
 }
 
 int connect_to_server(socket_t* client,
@@ -98,22 +93,20 @@ int connect_to_server(socket_t* client,
 }
 
 
-void init_client(const char* address, unsigned int port, FILE* input_file) {
+int init_client(const char *address, unsigned int port, FILE *input_file) {
     socket_t client;
-/*    if (connect_to_server(&client, address, port)) {
-        return;
-    }
-*/
-    char* input = read_input(input_file);
-    if (!input) {
-        return;
+    if (connect_to_server(&client, address, port)) {
+        return 1;
     }
 
+    char input = send_input(input_file);
+    if (input < 0) {
+        return 1;
+    }
 
-    socket_send(&client, input, strlen(input));
 
-    char buf[7];
-    socket_receive(&client, buf, 7);
+    socket_send(&client, &input, sizeof(char));
+
     socket_destroy(&client);
-    free(input);
+    return 0;
 }

@@ -28,8 +28,9 @@ int main(int argc, char** argv) {
             fprintf(stderr, "File input error!\n");
             return 1;
         }
-        init_client(address, port, f);
+        int exit_code = init_client(address, port, f);
         fclose(f);
+        return exit_code;
 
     } else if (!strcmp(argv[1], "server")) {
         if (argc < 3) {
@@ -37,7 +38,8 @@ int main(int argc, char** argv) {
             return 1;
         }
         unsigned int port = (unsigned int) atoi(argv[2]);
-        init_server(port);
+        return init_server(port);
+
     } else {
         print_error_string();
         return 1;

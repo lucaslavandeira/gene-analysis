@@ -6,28 +6,30 @@
 #include <string.h>
 #include "socket.h"
 
-void init_server(unsigned int port) {
+int init_server(unsigned int port) {
     socket_t server, client;
     if (socket_create(&server)) {
         perror("Error creating the socket");
-        return;
+        return 1;
     }
 
     if (socket_bind_and_listen(&server, port)) {
         perror("Error binding the socket");
-        return;
+        return 1;
     }
 
 
     if (socket_accept(&server, &client)) {
         perror("Error accepting a connection");
-        return;
+        return 1;
     }
 
-    char buf[10];
-    socket_receive(&client, buf, 10);
+    char buf = 0;
+    socket_receive(&client, &buf, 1);
 
-    printf("MESSAGE RECEIVED: %s\n", buf);
+    printf("MESSAGE RECEIVED: %d\n", buf);
     socket_send(&client, "Hi man!", 7);
-    return;
+    socket_destroy(&server);
+    socket_destroy(&client);
+    return 0;
 }
