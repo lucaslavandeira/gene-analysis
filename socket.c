@@ -30,7 +30,7 @@ int socket_bind_and_listen(socket_t *s, const unsigned int port) {
     memset(&srv, 0, sizeof(srv));
     srv.sin_family = AF_INET;
     srv.sin_addr.s_addr = htonl(INADDR_ANY);
-    srv.sin_port = htons(port);
+    srv.sin_port = htons((uint16_t ) port);
 
     if (bind(s->fd, (const struct sockaddr *) &srv, sizeof(srv)) < 0) {
         return 1;
