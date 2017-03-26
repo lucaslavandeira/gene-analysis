@@ -25,7 +25,8 @@ char* read_input(FILE* f) {
 
 int connect_to_server(socket_t* client,
                       const char* address,
-                      unsigned int port) {
+                      unsigned int port)
+{
     if (socket_create(client)) {
         perror("Error creating the socket");
         return 1;
