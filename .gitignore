@@ -8,5 +8,5 @@ CMakeLists.txt
 .idea
 valgrind_*
 test/tp
-input.txt
+test/*.txt
 *.args
