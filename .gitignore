@@ -1,0 +1,11 @@
+*.o
+*.sh
+*_std*
+*.py
+cmake-build-debug
+CMakeLists.txt
+.idea
+valgrind_*
+filter_options
+tp
+input.txt
