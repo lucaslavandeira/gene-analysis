@@ -19,14 +19,11 @@ void init_server(unsigned int port) {
     }
 
 
-    printf("Running as server on port %d\n", port);
     if(socket_accept(&server, &client)) {
         perror("Error accepting a connection");
         return;
     }
-
-    printf("Connection established !!!\n");
-
+    
     char buf[10];
     socket_receive(&client, buf, 10);
 

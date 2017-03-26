@@ -6,9 +6,9 @@
 #include "server.h"
 
 void print_error_string() {
-    printf("Wrong input, usage:\n"
-                   "\t./tp client <server> <port> <input-file>\n"
-                   "OR\t./tp server <port>\n");
+    fprintf(stderr, "Wrong input, usage:\n"
+                    "\t./tp client <server> <port> <input-file>\n"
+                    "OR\t./tp server <port>\n");
 }
 
 int main(int argc, char** argv) {
@@ -21,19 +21,23 @@ int main(int argc, char** argv) {
     }
 
     if (!strcmp(argv[1], "client")) {
-
         char* address = argv[2];
         unsigned int port = (unsigned int)atoi(argv[3]);
         FILE* f = fopen(argv[4], "r");
+        if (!f) {
+            fprintf(stderr, "File input error!\n");
+            return 1;
+        }
         init_client(address, port, f);
         fclose(f);
+
     } else if (!strcmp(argv[1], "server")) {
         if(argc < 3) {
             print_error_string();
             return 1;
         }
-        int port = atoi(argv[2]);
-        init_server((unsigned int)port);
+        unsigned int port = (unsigned int) atoi(argv[2]);
+        init_server(port);
     } else {
         print_error_string();
         return 1;
