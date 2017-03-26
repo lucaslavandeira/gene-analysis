@@ -9,3 +9,4 @@ valgrind_*
 filter_options
 tp
 input.txt
+*.args
