@@ -4,3 +4,6 @@
 Simple client/server TCP/IP network assignment using sockets in C.
 
 Build with make.
+
+# cpplint
+run cpplint.sh from the src directory
