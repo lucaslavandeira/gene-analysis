@@ -86,7 +86,7 @@ ssize_t socket_send(socket_t* s, const char* msg, size_t len) {
         }
         total_bytes += sent;
     }
-    return 0;
+    return 1;
 }
 
 ssize_t socket_receive(socket_t *s, char *buf, size_t len) {
@@ -94,10 +94,10 @@ ssize_t socket_receive(socket_t *s, char *buf, size_t len) {
     ssize_t received = 1;  // Initial non zero value
     while (sent < len && received) {
         received = recv(s->fd, buf + sent, len - sent, MSG_NOSIGNAL);
-        if (received < 0) {
+        if (received < 1) { // read stopped, 0 for shutdown, -1 for error
             return received;
         }
         sent += received;
     }
-    return 0;
+    return 1;
 }

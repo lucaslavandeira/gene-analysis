@@ -53,7 +53,7 @@ char codify_codon(char *codon) {
 int send_input(FILE *f, socket_t* client) {
     /* Read in chunks of 3 characters, codifying them into a single byte as per
      * the codify_codon function, and pass it on to the server. Returns -1 in
-     * case of failure.
+     * case of failure, 0 otherwise.
      *
     */
     fseek(f, 0L, SEEK_END);
@@ -66,10 +66,11 @@ int send_input(FILE *f, socket_t* client) {
     fseek(f, 0L, SEEK_SET);
 
 
-    char codon_buffer[CODON_LENGTH] = "";
+    char codon_buffer[CODON_LENGTH];
+    size_t read;
     while (1) {
-        size_t read = fread(codon_buffer, sizeof(char), CODON_LENGTH, f);
-        if (!read) { // File completely read
+        read = fread(codon_buffer, sizeof(char), CODON_LENGTH, f);
+        if (read < 1) {
             break;
         }
         char code = codify_codon(codon_buffer);
@@ -78,31 +79,20 @@ int send_input(FILE *f, socket_t* client) {
                     "only include characters A, U, G or C\n");
             return -1;
         }
-
         socket_send(client, &code, sizeof(char));
     }
-    return 0;
-}
-
-int connect_to_server(socket_t* client,
-                      const char* address,
-                      unsigned int port)
-{
-    if (socket_create(client)) {
-        perror("Error creating the socket");
-        return 1;
-    }
-    if (socket_connect(client, address, port)) {
-        perror("Error connecting to server");
-        return 1;
-    }
-    return 0;
+    return (int) read; // -1 if error, 0 if EOF reached normally
 }
 
 
 int init_client(const char *address, unsigned int port, FILE *input_file) {
     socket_t client;
-    if (connect_to_server(&client, address, port)) {
+    if (socket_create(&client)) {
+        perror("Error creating the socket");
+        return 1;
+    }
+    if (socket_connect(&client, address, port)) {
+        perror("Error connecting to server");
         return 1;
     }
 
