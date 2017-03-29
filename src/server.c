@@ -53,7 +53,8 @@ int init_server(unsigned int port) {
     socket_destroy(&server);
     socket_destroy(&client);
 
-    if (bytes < 0) { // error in receiving
+    if (bytes < 0) {
+        fprintf(stderr, "Error in receiving data from the client\n");
         return 1;
     }
     return 0;
