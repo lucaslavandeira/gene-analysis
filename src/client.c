@@ -5,9 +5,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
-#include "main.h"
 #include "client.h"
 #include "socket.h"
+#include "codon.h"
+#include "common.h"
+
+#define BASES "AUGC"
+#define CODON_LENGTH 3
+
 
 int validate_base(char base) {
     /*  If char base is equal to any of
@@ -81,9 +86,20 @@ int send_input(FILE *f, socket_t* client) {
         }
         socket_send(client, &code, sizeof(char));
     }
+
+    // Send EOF_CHAR over to server to inform we've sent all our codons
+    char end = EOF_CHAR;
+    socket_send(client, &end, sizeof(char));
+
     return (int) read; // -1 if error, 0 if EOF reached normally
 }
 
+int receive_response(socket_t* client) {
+    char message[MSG_SIZE];
+    socket_receive(client, message, MSG_SIZE);
+    printf("%s", message);
+    return 1;
+}
 
 int init_client(const char *address, unsigned int port, FILE *input_file) {
     socket_t client;
@@ -96,8 +112,13 @@ int init_client(const char *address, unsigned int port, FILE *input_file) {
         return 1;
     }
 
-    int input = send_input(input_file, &client);
-    if (input < 0) {
+
+    if (send_input(input_file, &client) < 0) {
+        return 1;
+    }
+
+
+    if (receive_response(&client) < 0) {
         return 1;
     }
     socket_shutdown(&client, SHUT_WR);

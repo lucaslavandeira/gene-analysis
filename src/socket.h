@@ -7,7 +7,7 @@
 
 #include <sys/types.h>
 typedef struct {
-    int fd;
+    int _fd;
 } socket_t;
 
 int socket_create(socket_t* s);

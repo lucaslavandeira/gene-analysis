@@ -3,16 +3,10 @@
 //
 
 #include <stdio.h>
-#include <string.h>
 #include "socket.h"
+#include "codon.h"
+#include "common.h"
 
-#include "main.h"
-
-int* count_codon(int codon) {
-    static int codons[CODON_AMT];
-    codons[codon]++;
-    return codons;
-}
 
 int init_server(unsigned int port) {
     socket_t server, client;
@@ -32,24 +26,23 @@ int init_server(unsigned int port) {
         return 1;
     }
 
-    char buf = 0;
+    char buf;
     ssize_t bytes;
     int* codons = NULL;
     while (1) {
         bytes = socket_receive(&client, &buf, 1);
-        if (bytes < 1) {
+        if (buf == EOF_CHAR) {
             break;
         }
         codons = count_codon(buf);
     }
 
     if (codons) {
-        for (int i = 0; i < CODON_AMT; i++) {
-            if (codons[i]) {
-                printf("CODON %i: %i\n", i, codons[i]);
-            }
-        }
+        char result_msg[MSG_SIZE];
+        write_return_msg(codons, result_msg, MSG_SIZE);
+        socket_send(&client, result_msg, MSG_SIZE);
     }
+
     socket_destroy(&server);
     socket_destroy(&client);
 
