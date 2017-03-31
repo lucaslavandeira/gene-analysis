@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
 #include "client.h"
 #include "socket.h"
 #include "codon.h"
@@ -95,8 +96,11 @@ int send_input(FILE *f, socket_t* client) {
 }
 
 int receive_response(socket_t* client) {
-    char message[MSG_SIZE];
-    socket_receive(client, message, MSG_SIZE);
+    uint32_t len;
+    socket_receive(client, (char*) &len, sizeof(uint32_t));
+    printf("LENGTH: %u\n", ntohl(len));
+    char message[MSG_SIZE] = "";
+    socket_receive(client, message, (size_t) len);
     printf("%s", message);
     return 1;
 }

@@ -3,10 +3,25 @@
 //
 
 #include <stdio.h>
+#include <string.h>
+#include <stdint.h>
+#include <netinet/in.h>
 #include "socket.h"
 #include "codon.h"
 #include "common.h"
 
+int send_result(socket_t* client, int* codons) {
+    char result_msg[MSG_SIZE];
+    write_return_msg(codons, result_msg, MSG_SIZE);
+
+    // First send over the message length
+    unsigned int len = (int) strlen(result_msg);
+    uint32_t nlen = htonl(len);
+    socket_send(client, (char*) &nlen, sizeof(nlen));
+
+    socket_send(client, result_msg, len);
+    return 1;
+}
 
 int init_server(unsigned int port) {
     socket_t server, client;
@@ -38,9 +53,7 @@ int init_server(unsigned int port) {
     }
 
     if (codons) {
-        char result_msg[MSG_SIZE];
-        write_return_msg(codons, result_msg, MSG_SIZE);
-        socket_send(&client, result_msg, MSG_SIZE);
+        send_result(&client, codons);
     }
 
     socket_destroy(&server);

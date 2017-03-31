@@ -78,7 +78,7 @@ int socket_shutdown(socket_t* s, const int mode) {
 
 ssize_t socket_send(socket_t* s, const char* msg, size_t len) {
     ssize_t total_bytes = 0;
-    ssize_t sent = 1;  // Initial non zero value
+    ssize_t sent = 1;
     while (total_bytes < len && sent) {
         sent = send(s->_fd, msg + total_bytes, len - total_bytes, MSG_NOSIGNAL);
         if (sent < 0) {
@@ -91,7 +91,7 @@ ssize_t socket_send(socket_t* s, const char* msg, size_t len) {
 
 ssize_t socket_receive(socket_t *s, char *buf, size_t len) {
     ssize_t sent = 0;
-    ssize_t received = 1;  // Initial non zero value
+    ssize_t received = 1;
     while (sent < len && received) {
         received = recv(s->_fd, buf + sent, len - sent, MSG_NOSIGNAL);
         if (received < 1) { // read stopped, 0 for shutdown, -1 for error
