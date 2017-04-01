@@ -24,23 +24,16 @@ int send_result(socket_t* client, int* codons) {
 }
 
 int process_codons(socket_t* client) {
-    char buf = 0;
-    ssize_t bytes;
-    int* codons = NULL;
-    while (buf != EOF_CHAR) {
-        bytes = socket_receive(client, &buf, 1);
-        if (!bytes) {
-            fprintf(stderr, "Error in receiving data from the client\n");
-            return 1;
-        }
-        codons = codon_count(buf);
+    uint32_t len;
+    socket_receive(client, (char*) &len, sizeof(uint32_t));
+    len = ntohl(len);
+
+    char codons[MAX_CODONS];
+    socket_receive(client, codons, len);
+
+    for (int i =0; i < len; i++) {
+        printf("%d ", codons[i]);
     }
-
-    if (codons) {
-        send_result(client, codons);
-    }
-
-
     return 0;
 }
 

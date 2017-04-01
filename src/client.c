@@ -73,7 +73,8 @@ int send_input(FILE *file, socket_t* client) {
 
 
     char codon_buffer[CODON_LENGTH];
-
+    char codons[MAX_CODONS];
+    uint32_t index = 0;
     while (1) {
         size_t read = fread(codon_buffer, sizeof(char), CODON_LENGTH, file);
         if (!read) {
@@ -90,12 +91,13 @@ int send_input(FILE *file, socket_t* client) {
                     "only include characters A, U, G or C\n");
             return 1;
         }
-        socket_send(client, &code, sizeof(char));
+        memcpy(codons + index, &code, 1);
+        index++;
     }
+    uint32_t nindex = htonl(index);
 
-    // Send EOF_CHAR over to server to inform we've sent all our codons
-    char end = EOF_CHAR;
-    socket_send(client, &end, sizeof(char));
+    socket_send(client, (char*) &nindex, sizeof(uint32_t));
+    socket_send(client, codons, index);
 
     return 0;
 }
