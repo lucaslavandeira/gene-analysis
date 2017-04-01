@@ -23,6 +23,27 @@ int send_result(socket_t* client, int* codons) {
     return 1;
 }
 
+int process_codons(socket_t* client) {
+    char buf = 0;
+    ssize_t bytes;
+    int* codons = NULL;
+    while (buf != EOF_CHAR) {
+        bytes = socket_receive(client, &buf, 1);
+        if (!bytes) {
+            fprintf(stderr, "Error in receiving data from the client\n");
+            return 1;
+        }
+        codons = codon_count(buf);
+    }
+
+    if (codons) {
+        send_result(client, codons);
+    }
+
+
+    return 0;
+}
+
 int init_server(unsigned int port) {
     socket_t server, client;
     if (socket_create(&server)) {
@@ -41,27 +62,13 @@ int init_server(unsigned int port) {
         return 1;
     }
 
-    char buf;
-    ssize_t bytes;
-    int* codons = NULL;
-    while (1) {
-        bytes = socket_receive(&client, &buf, 1);
-        if (buf == EOF_CHAR) {
-            break;
-        }
-        codons = count_codon(buf);
-    }
-
-    if (codons) {
-        send_result(&client, codons);
+    // Connection established
+    if (process_codons(&client)) {
+        return 1;
     }
 
     socket_destroy(&server);
     socket_destroy(&client);
 
-    if (bytes < 0) {
-        fprintf(stderr, "Error in receiving data from the client\n");
-        return 1;
-    }
     return 0;
 }

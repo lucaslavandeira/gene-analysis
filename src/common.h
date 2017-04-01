@@ -6,6 +6,6 @@
 #define GENE_ANALYSIS_COMMON_H
 
 #define MSG_SIZE 512
-#define EOF_CHAR '-'
+#define EOF_CHAR '~'
 
 #endif //GENE_ANALYSIS_COMMON_H

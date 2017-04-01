@@ -9,7 +9,7 @@
 
 #define CODON_AMT 64
 
-int* count_codon(int code);
+int* codon_count(int code);
 int write_return_msg(int* codons, char* buf, size_t len);
 
 #endif //GENE_ANALYSIS_CODON_H

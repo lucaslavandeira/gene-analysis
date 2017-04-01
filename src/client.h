@@ -6,6 +6,6 @@
 #define GENE_ANALYSIS_CLIENT_H
 #include <stdio.h>
 
-int init_client(const char *address, unsigned int port, FILE *input);
+int init_client(const char *address, unsigned int port, char* input_path);
 
 #endif //GENE_ANALYSIS_CLIENT_H

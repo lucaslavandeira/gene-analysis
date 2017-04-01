@@ -21,16 +21,13 @@ int main(int argc, char** argv) {
     }
 
     if (!strcmp(argv[1], "client")) {
-        char* address = argv[2];
-        unsigned int port = (unsigned int)atoi(argv[3]);
-        FILE* f = fopen(argv[4], "r");
-        if (!f) {
-            fprintf(stderr, "File input error!\n");
+        if (argc < 4) {
+            print_error_string();
             return 1;
         }
-        int exit_code = init_client(address, port, f);
-        fclose(f);
-        return exit_code;
+        char* address = argv[2];
+        unsigned int port = (unsigned int)atoi(argv[3]);
+        return init_client(address, port, argv[4]);
 
     } else if (!strcmp(argv[1], "server")) {
         if (argc < 3) {
@@ -44,5 +41,4 @@ int main(int argc, char** argv) {
         print_error_string();
         return 1;
     }
-    return 0;
 }

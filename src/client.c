@@ -56,34 +56,39 @@ char codify_codon(char *codon) {
     return byte;
 }
 
-int send_input(FILE *f, socket_t* client) {
+int send_input(FILE *file, socket_t* client) {
     /* Read in chunks of 3 characters, codifying them into a single byte as per
-     * the codify_codon function, and pass it on to the server. Returns -1 in
+     * the codify_codon function, and pass it on to the server. Returns 1 in
      * case of failure, 0 otherwise.
      *
     */
-    fseek(f, 0L, SEEK_END);
-    size_t len = (size_t) ftell(f);
+    fseek(file, 0L, SEEK_END);
+    size_t len = (size_t) ftell(file);
 
     if (len%3) {
         fprintf(stderr, "Invalid amount of codons, must be a multiple of 3\n");
         return -1;
     }
-    fseek(f, 0L, SEEK_SET);
+    fseek(file, 0L, SEEK_SET);
 
 
     char codon_buffer[CODON_LENGTH];
-    size_t read;
+
     while (1) {
-        read = fread(codon_buffer, sizeof(char), CODON_LENGTH, f);
-        if (read < 1) {
+        size_t read = fread(codon_buffer, sizeof(char), CODON_LENGTH, file);
+        if (!read) {
             break;
         }
+
+        if (read < 0) {
+            return 1;
+        }
+
         char code = codify_codon(codon_buffer);
         if (code < 0) {
             fprintf(stderr, "ERROR: Wrong file format, "
                     "only include characters A, U, G or C\n");
-            return -1;
+            return 1;
         }
         socket_send(client, &code, sizeof(char));
     }
@@ -92,20 +97,24 @@ int send_input(FILE *f, socket_t* client) {
     char end = EOF_CHAR;
     socket_send(client, &end, sizeof(char));
 
-    return (int) read; // -1 if error, 0 if EOF reached normally
+    return 0;
 }
 
 int receive_response(socket_t* client) {
     uint32_t len;
     socket_receive(client, (char*) &len, sizeof(uint32_t));
-    printf("LENGTH: %u\n", ntohl(len));
     char message[MSG_SIZE] = "";
-    socket_receive(client, message, (size_t) len);
+    socket_receive(client, message, ntohl(len));
     printf("%s", message);
-    return 1;
+    return 0;
 }
 
-int init_client(const char *address, unsigned int port, FILE *input_file) {
+int init_client(const char *address, unsigned int port, char* input_path) {
+    FILE* input_file = fopen(input_path, "r");
+    if (!input_file) {
+        return 1;
+    }
+
     socket_t client;
     if (socket_create(&client)) {
         perror("Error creating the socket");
@@ -116,16 +125,17 @@ int init_client(const char *address, unsigned int port, FILE *input_file) {
         return 1;
     }
 
-
-    if (send_input(input_file, &client) < 0) {
+    if (send_input(input_file, &client)) {
         return 1;
     }
 
 
-    if (receive_response(&client) < 0) {
+    if (receive_response(&client)) {
         return 1;
     }
     socket_shutdown(&client, SHUT_WR);
     socket_destroy(&client);
+
+    fclose(input_file);
     return 0;
 }

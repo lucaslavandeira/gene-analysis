@@ -1,0 +1,20 @@
+Fenilalanina
+Leucina
+Serina
+Tirosina
+Cisteína
+Triptófano
+Prolina
+Histidina
+Ácido glutámico
+Isoleucina
+Metionina
+Treonina
+Asparagina
+Lisina
+Arginina
+Valina
+Alanina
+Ácido aspártico
+Glicina
+STOP
