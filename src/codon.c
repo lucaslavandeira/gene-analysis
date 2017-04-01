@@ -3,13 +3,55 @@
 //
 
 #include <stdio.h>
+#include <string.h>
 #include "codon.h"
 #include "common.h"
 
-int* codon_count(int codon) {
-    static int codons[CODON_AMT];
-    codons[codon]++;
-    return codons;
+#define kLineLength 4
+enum codons {
+    STOP = 0,
+    Fen,
+    Leu,
+    Ser,
+    Tir,
+    Cis,
+    Trp,
+    Pro,
+    His,
+    Glu,
+    Ile,
+    Met,
+    Tre,
+    Asn,
+    Lys,
+    Arg,
+    Val,
+    Ala,
+    Asp,
+    Gli
+};
+
+void codon_count(char *codon, size_t len, int* count) {
+    FILE* codes = fopen("codons.txt", "r");
+    if (!codes) {
+        return;
+    }
+    char line[kLineLength];
+    int index = 0;
+    while (1) {
+        if (!fgets(line, kLineLength, codes)) { // EOF
+            break;
+        }
+        for (int i = 0; i < len; i++) {
+            int codon_id = atoi(line);
+            if (index == codon[i]) {
+                count[codon_id]++;
+            }
+        }
+        index++;
+    }
+
+    return;
 }
 
 int write_return_msg(int* codons, char* buf, size_t len) {

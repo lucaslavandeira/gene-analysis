@@ -23,20 +23,6 @@ int send_result(socket_t* client, int* codons) {
     return 1;
 }
 
-int process_codons(socket_t* client) {
-    uint32_t len;
-    socket_receive(client, (char*) &len, sizeof(uint32_t));
-    len = ntohl(len);
-
-    char codons[MAX_CODONS];
-    socket_receive(client, codons, len);
-
-    for (int i =0; i < len; i++) {
-        printf("%d ", codons[i]);
-    }
-    return 0;
-}
-
 int init_server(unsigned int port) {
     socket_t server, client;
     if (socket_create(&server)) {
@@ -56,9 +42,23 @@ int init_server(unsigned int port) {
     }
 
     // Connection established
-    if (process_codons(&client)) {
-        return 1;
-    }
+    uint32_t len;
+    socket_receive(&client, (char*) &len, sizeof(uint32_t));
+    len = ntohl(len);
+    char codons[MAX_CODONS];
+    socket_receive(&client, codons, len);
+
+    int count[20];
+    memset(count, 0, sizeof(count));
+    codon_count(codons, len, count);
+
+    char msg[MSG_SIZE] = "";
+    write_return_msg(count, msg, MSG_SIZE);
+
+    len = ntohl((uint32_t) strlen(msg));
+    socket_send(&client, (char*) &len, sizeof(len));
+
+    socket_send(&client, msg, len);
 
     socket_destroy(&server);
     socket_destroy(&client);
