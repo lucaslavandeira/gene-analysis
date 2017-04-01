@@ -1,6 +1,5 @@
 *.o
-free_port.sh
-run.sh
+
 *_std*
 *.py
 cmake-build-debug
@@ -9,5 +8,3 @@ CMakeLists.txt
 valgrind_*
 tp
 input.txt
-test/*.txt
-*.args
