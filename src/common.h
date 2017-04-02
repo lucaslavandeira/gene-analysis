@@ -6,7 +6,6 @@
 #define GENE_ANALYSIS_COMMON_H
 
 #define MAX_CODONS 512
-#define MSG_SIZE 512
-#define EOF_CHAR '~'
+#define MSG_SIZE 1024
 
 #endif //GENE_ANALYSIS_COMMON_H

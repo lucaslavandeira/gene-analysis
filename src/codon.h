@@ -10,6 +10,6 @@
 #define CODON_AMT 20
 
 void codon_count(char *codes, size_t len, int *count);
-int write_return_msg(int* codons, char* buf, size_t len);
+int codon_write_return_msg(int *codons, char *buf, size_t len);
 
 #endif //GENE_ANALYSIS_CODON_H

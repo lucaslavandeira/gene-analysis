@@ -107,6 +107,7 @@ int receive_response(socket_t* client) {
     socket_receive(client, (char*) &len, sizeof(uint32_t));
     char message[MSG_SIZE] = "";
     socket_receive(client, message, ntohl(len));
+    printf("Debugs: %lu\n", strlen(message));
     printf("%s", message);
     return 0;
 }
