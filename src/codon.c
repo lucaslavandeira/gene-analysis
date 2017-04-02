@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "codon.h"
-#include "common.h"
 
 #define kLineLength 4
 #define kNameLength 25
@@ -40,6 +39,30 @@ void codon_count(char *codon, size_t len, int* count) {
 
     fclose(codes);
 }
+
+int codon_compare(const struct codon* a, const struct codon* b) {
+    if (a->count > b->count) {
+        return -1;
+    } else if (a->count < b->count) {
+        return 1;
+    }
+
+    if (!strncmp(a->name, "Ácido", 6)) {
+        if (b->name[0] == 'A') {
+            return strcmp(a->name+2, b->name+1);
+        }
+        return -1;
+    }
+
+    if (!strncmp(b->name, "Ácido", 6)) {
+        if (a->name[0] == 'A') {
+            return strcmp(a->name+1, b->name+2);
+        }
+        return 1;
+    }
+    return strcmp(a->name, b->name);
+}
+
 
 int codon_write_return_msg(int *codons, char *buf, size_t len) {
     FILE* names = fopen("codon_types.txt", "r");
@@ -76,9 +99,7 @@ int codon_write_return_msg(int *codons, char *buf, size_t len) {
     for (int i = 0; i < FREQUENT_AMOUNT; i++) {
         int max = 0;
         for (int j = 1; j < CODON_AMT; j++) {
-            if (codon_array[j].count > codon_array[max].count ||
-                    (codon_array[j].count == codon_array[max].count &&
-                    strcmp(codon_array[i].name, codon_array[max].name) < 0)) {
+            if (codon_compare(&codon_array[j], &codon_array[max]) < 0) {
                 max = j;
             }
         }
@@ -88,6 +109,7 @@ int codon_write_return_msg(int *codons, char *buf, size_t len) {
                                   codon_array[max].count);
         codon_array[max].count = 0; // Next max will surely be different!
     }
+
     fclose(names);
     return 0;
 }

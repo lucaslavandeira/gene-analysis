@@ -64,11 +64,11 @@ int send_input(FILE *file, socket_t* client) {
     */
 
     char codon_buffer[CODON_LENGTH];
-    char codons[MAX_CODONS];
+    char codified_codons[MAX_CODONS];
     uint32_t index = 0;
     while (1) {
         size_t read = fread(codon_buffer, sizeof(char), CODON_LENGTH, file);
-        if (!read || codon_buffer[0] != '\n') {
+        if (!read || codon_buffer[0] == '\n') {
             break;
         }
 
@@ -82,13 +82,13 @@ int send_input(FILE *file, socket_t* client) {
                     "only include characters A, U, G or C\n");
             return 1;
         }
-        memcpy(codons + index, &code, 1);
+        memcpy(codified_codons + index, &code, 1);
         index++;
     }
     uint32_t nindex = htonl(index);
 
     socket_send(client, (char*) &nindex, sizeof(uint32_t));
-    socket_send(client, codons, index);
+    socket_send(client, codified_codons, index);
 
     return 0;
 }

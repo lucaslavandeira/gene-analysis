@@ -56,7 +56,6 @@ int init_server(unsigned int port) {
     codon_count(codons, len, count);
 
     char msg[MSG_SIZE] = "";
-
     if (codon_write_return_msg(count, msg, MSG_SIZE)) {
         fprintf(stderr, "Error writing message, check validity of " \
                         "codons.txt and codon_types.txt\n");

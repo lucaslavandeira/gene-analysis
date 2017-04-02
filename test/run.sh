@@ -8,8 +8,8 @@ fi
 server_host=127.0.0.1
 port=$1
 mode=$2
-server_cmd="./../src/tp server"
-client_cmd="./../src/tp client"
+server_cmd="./tp server"
+client_cmd="./tp client"
 valgrind_error_code=42
 
 if [ "$mode" == "valgrind" ]; then
