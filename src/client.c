@@ -62,22 +62,13 @@ int send_input(FILE *file, socket_t* client) {
      * case of failure, 0 otherwise.
      *
     */
-    fseek(file, 0L, SEEK_END);
-    size_t len = (size_t) ftell(file);
-
-    if (len%3) {
-        fprintf(stderr, "Invalid amount of codons, must be a multiple of 3\n");
-        return -1;
-    }
-    fseek(file, 0L, SEEK_SET);
-
 
     char codon_buffer[CODON_LENGTH];
     char codons[MAX_CODONS];
     uint32_t index = 0;
     while (1) {
         size_t read = fread(codon_buffer, sizeof(char), CODON_LENGTH, file);
-        if (!read) {
+        if (!read || codon_buffer[0] != '\n') {
             break;
         }
 
@@ -107,7 +98,6 @@ int receive_response(socket_t* client) {
     socket_receive(client, (char*) &len, sizeof(uint32_t));
     char message[MSG_SIZE] = "";
     socket_receive(client, message, ntohl(len));
-    printf("Debugs: %lu\n", strlen(message));
     printf("%s", message);
     return 0;
 }
