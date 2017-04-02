@@ -25,8 +25,9 @@ int main(int argc, char** argv) {
             print_error_string();
             return 1;
         }
+
         char* address = argv[2];
-        unsigned int port = (unsigned int)atoi(argv[3]);
+        unsigned int port = (unsigned int) atoi(argv[3]);
         return init_client(address, port, argv[4]);
 
     } else if (!strcmp(argv[1], "server")) {
@@ -34,6 +35,7 @@ int main(int argc, char** argv) {
             print_error_string();
             return 1;
         }
+
         unsigned int port = (unsigned int) atoi(argv[2]);
         return init_server(port);
 

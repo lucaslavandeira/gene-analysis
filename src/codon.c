@@ -18,6 +18,12 @@ struct codon {
 };
 
 void codon_count(char *codon, size_t len, int* count) {
+    /* Count occurrences of each codon type in the char array codon,
+     * saving them up in the int array count. Each type has several different
+     * codes pointing to it; the relation code: type is read up from the
+     * codons.txt file.
+     */
+
     FILE* codes = fopen("codons.txt", "r");
     if (!codes) {
         return;
@@ -41,12 +47,16 @@ void codon_count(char *codon, size_t len, int* count) {
 }
 
 int codon_compare(const struct codon* a, const struct codon* b) {
+    /* Compares two codon structs, first by count then by alphabetical order.
+     * Returns -1 if a is bigger, 0 if they're equal, 1 if b is bigger. */
     if (a->count > b->count) {
         return -1;
     } else if (a->count < b->count) {
         return 1;
     }
 
+    // Hack to fix ordering of words starting with acute accents. Works in any
+    // computer independent of locale.
     if (!strncmp(a->name, "Ácido", 6)) {
         if (b->name[0] == 'A') {
             return strcmp(a->name+2, b->name+1);
@@ -65,11 +75,14 @@ int codon_compare(const struct codon* a, const struct codon* b) {
 
 
 int codon_write_return_msg(int *codons, char *buf, size_t len) {
+    /* Writes up the message in the format set by the assignment. Returns -1 on
+     * a file read error, 0 otherwise in all cases (even if the message was not
+     * rendered correctly).
+     */
     FILE* names = fopen("codon_types.txt", "r");
     if (!names) {
         return -1;
     }
-
 
     struct codon codon_array[CODON_AMT];
     for (int i = 0; i < CODON_AMT; i++) {

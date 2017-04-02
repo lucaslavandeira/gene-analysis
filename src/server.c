@@ -11,21 +11,9 @@
 #include "common.h"
 
 
-int send_result(socket_t* client, int* codons) {
-    char result_msg[MSG_SIZE];
-    codon_write_return_msg(codons, result_msg, MSG_SIZE);
-
-    // First send over the message length
-    unsigned int len = (int) strlen(result_msg);
-    uint32_t nlen = htonl(len);
-    socket_send(client, (char*) &nlen, sizeof(nlen));
-
-    socket_send(client, result_msg, len);
-    return 1;
-}
-
 int init_server(unsigned int port) {
     socket_t server, client;
+
     if (socket_create(&server)) {
         perror("Error creating the socket");
         return 1;
@@ -44,18 +32,19 @@ int init_server(unsigned int port) {
         return 1;
     }
 
-    // Connection established
+    // Connection established, receive length first, then the codons
     uint32_t len = 0;
     socket_receive(&client, (char*) &len, sizeof(len));
     len = ntohl(len);
+
     char codons[MAX_CODONS];
     socket_receive(&client, codons, len);
 
+
     int count[CODON_AMT] = {0};
-    memset(count, 0, sizeof(count));
     codon_count(codons, len, count);
 
-    char msg[MSG_SIZE] = "";
+    char msg[MSG_SIZE];
     if (codon_write_return_msg(count, msg, MSG_SIZE)) {
         fprintf(stderr, "Error writing message, check validity of " \
                         "codons.txt and codon_types.txt\n");

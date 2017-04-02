@@ -8,7 +8,6 @@
 #include <netinet/in.h>
 #include "client.h"
 #include "socket.h"
-#include "codon.h"
 #include "common.h"
 
 #define BASES "AUGC"
@@ -93,15 +92,6 @@ int send_input(FILE *file, socket_t* client) {
     return 0;
 }
 
-int receive_response(socket_t* client) {
-    uint32_t len;
-    socket_receive(client, (char*) &len, sizeof(uint32_t));
-    char message[MSG_SIZE] = "";
-    socket_receive(client, message, ntohl(len));
-    printf("%s", message);
-    return 0;
-}
-
 int init_client(const char *address, unsigned int port, char* input_path) {
     FILE* input_file = fopen(input_path, "r");
     if (!input_file) {
@@ -122,10 +112,12 @@ int init_client(const char *address, unsigned int port, char* input_path) {
         return 1;
     }
 
+    uint32_t len;
+    socket_receive(&client, (char*) &len, sizeof(uint32_t));
+    char message[MSG_SIZE] = "";
+    socket_receive(&client, message, ntohl(len));
+    printf("%s", message);
 
-    if (receive_response(&client)) {
-        return 1;
-    }
     socket_shutdown(&client, SHUT_WR);
     socket_destroy(&client);
 

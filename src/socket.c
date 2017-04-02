@@ -26,7 +26,6 @@ int socket_destroy(socket_t* s) {
 
 int socket_bind_and_listen(socket_t *s, const unsigned int port) {
     struct sockaddr_in srv;
-
     memset(&srv, 0, sizeof(srv));
     srv.sin_family = AF_INET;
     srv.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -42,8 +41,8 @@ int socket_bind_and_listen(socket_t *s, const unsigned int port) {
 
 int socket_accept(socket_t* s, socket_t* client_socket) {
     struct sockaddr_in client;
-
     socklen_t clilen = (socklen_t) sizeof(struct sockaddr_in);
+
     int fd = accept(s->_fd, (struct sockaddr*) &client, &clilen);
     if (fd < 0) {
         return 1;
@@ -54,7 +53,6 @@ int socket_accept(socket_t* s, socket_t* client_socket) {
 
 int socket_connect(socket_t *s, const char *host, const unsigned int port) {
     struct sockaddr_in srv;
-
     srv.sin_family = AF_INET;
     srv.sin_port = htons((uint16_t)port);
     srv.sin_addr.s_addr = inet_addr(host);
@@ -64,7 +62,6 @@ int socket_connect(socket_t *s, const char *host, const unsigned int port) {
     if (error){
         return 1;
     }
-
     return 0;
 }
 
@@ -79,6 +76,7 @@ int socket_shutdown(socket_t* s, const int mode) {
 ssize_t socket_send(socket_t* s, const char* msg, size_t len) {
     ssize_t total_bytes = 0;
     ssize_t sent = 1;
+
     while (total_bytes < len && sent) {
         sent = send(s->_fd, msg + total_bytes, len - total_bytes, MSG_NOSIGNAL);
         if (sent < 0) {
