@@ -17,7 +17,7 @@ struct codon {
     int count;
 };
 
-void codon_count(char *codon, size_t len, int* count) {
+void codon_count(char *codon, size_t len, int *count) {
     /* Count occurrences of each codon type in the char array codon,
      * saving them up in the int array count. Each type has several different
      * codes pointing to it; the relation code: type is read up from the

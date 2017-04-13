@@ -32,17 +32,14 @@ int init_server(unsigned int port) {
         return 1;
     }
 
-    // Connection established, receive length first, then the codons
-    uint32_t len = 0;
-    socket_receive(&client, (char*) &len, sizeof(len));
-    len = ntohl(len);
 
     char codons[MAX_CODONS];
-    socket_receive(&client, codons, len);
-
+    size_t len = (size_t) socket_receive(&client, codons, MAX_CODONS);
 
     int count[CODON_AMT] = {0};
     codon_count(codons, len, count);
+
+
 
     char msg[MSG_SIZE];
     if (codon_write_return_msg(count, msg, MSG_SIZE)) {
@@ -54,10 +51,21 @@ int init_server(unsigned int port) {
         return 1;
     }
 
-    len = ntohl((uint32_t) strlen(msg));
-    socket_send(&client, (char*) &len, sizeof(len));
-
-    socket_send(&client, msg, strlen(msg));
+    len = strlen(msg);
+    size_t offset = 0;
+    while (len) {
+        size_t to_send = len;
+        if (to_send > CHUNK_SIZE) {
+            to_send = CHUNK_SIZE;
+        }
+        ssize_t sent = socket_send(&client, msg + offset, to_send);
+        if (sent < 0) {
+            perror("Error sending message to client");
+        }
+        offset += sent;
+        len -= sent;
+    }
+    socket_shutdown(&client, SHUT_WR);
 
     socket_destroy(&server);
     socket_destroy(&client);

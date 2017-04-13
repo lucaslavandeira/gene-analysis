@@ -64,7 +64,7 @@ int send_input(FILE *file, socket_t* client) {
 
     char codon_buffer[CODON_LENGTH];
     char codified_codons[MAX_CODONS];
-    uint32_t index = 0;
+    uint32_t msg_len = 0;
     while (1) {
         size_t read = fread(codon_buffer, sizeof(char), CODON_LENGTH, file);
         if (!read || codon_buffer[0] == '\n') {
@@ -81,13 +81,27 @@ int send_input(FILE *file, socket_t* client) {
                     "only include characters A, U, G or C\n");
             return 1;
         }
-        memcpy(codified_codons + index, &code, 1);
-        index++;
+        memcpy(codified_codons + msg_len, &code, 1);
+        msg_len++;
     }
-    uint32_t nindex = htonl(index);
 
-    socket_send(client, (char*) &nindex, sizeof(uint32_t));
-    socket_send(client, codified_codons, index);
+    int offset = 0;
+    while (msg_len) {
+        size_t to_send = msg_len;
+        if (to_send > CHUNK_SIZE) {
+            to_send = CHUNK_SIZE;
+        }
+        ssize_t sent = socket_send(client,
+                                   codified_codons + offset, to_send);
+        if (sent < 0) {
+            perror("Error sending codons to server");
+            return 1;
+        }
+        offset += sent;
+        msg_len -= sent;
+    }
+    socket_shutdown(client, SHUT_WR);
+
 
     return 0;
 }
@@ -111,16 +125,14 @@ int init_client(const char *address, unsigned int port, char* input_path) {
     if (send_input(input_file, &client)) {
         return 1;
     }
+    fclose(input_file);
 
-    uint32_t len;
-    socket_receive(&client, (char*) &len, sizeof(uint32_t));
+    // Reads at most MSG_SIZE bytes. A socket shutdown is expected if less
     char message[MSG_SIZE] = "";
-    socket_receive(&client, message, ntohl(len));
+    socket_receive(&client, message, MSG_SIZE);
     printf("%s", message);
 
-    socket_shutdown(&client, SHUT_WR);
     socket_destroy(&client);
 
-    fclose(input_file);
     return 0;
 }
